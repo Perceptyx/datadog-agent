@@ -1,0 +1,1 @@
+dd-agent:*:485:485::0:0:DataDog Agent:/opt/datadog-agent:/usr/sbin/nologin
