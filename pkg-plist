@@ -1,4 +1,5 @@
-@owner(dd-agent,dd-agent)
+@owner dd-agent
+@group dd-agent
 %%ETCDIR%%/conf.d/active_directory.d/conf.yaml.example
 %%ETCDIR%%/conf.d/activemq.d/conf.yaml.example
 %%ETCDIR%%/conf.d/activemq.d/metrics.yaml
@@ -142,8 +143,12 @@
 %%ETCDIR%%/conf.d/wmi_check.d/conf.yaml.example
 %%ETCDIR%%/conf.d/yarn.d/conf.yaml.example
 %%ETCDIR%%/conf.d/zk.d/conf.yaml.example
+@dir %%LOGDIR%%
+@dir %%ETCDIR%%
+@dir %%ETCDIR%%/conf.d
 @sample %%ETCDIR%%/datadog.yaml.sample
-@owner
+@owner root
+@group wheel
 %%PYTHON_SITELIBDIR%%/datadog_active_directory-1.4.1-py%%PYTHON_VER%%.egg-info/PKG-INFO
 %%PYTHON_SITELIBDIR%%/datadog_active_directory-1.4.1-py%%PYTHON_VER%%.egg-info/SOURCES.txt
 %%PYTHON_SITELIBDIR%%/datadog_active_directory-1.4.1-py%%PYTHON_VER%%.egg-info/dependency_links.txt
@@ -2032,7 +2037,6 @@
 /opt/%%PORTNAME%%/embedded/lib/lib%%PORTNAME%%-rtloader.so.0.1.0
 /opt/%%PORTNAME%%/embedded/lib/lib%%PORTNAME%%-rtloader.so.1
 /opt/%%PORTNAME%%/embedded/lib/lib%%PORTNAME%%-three.so
-@dir %%LOGDIR%%
 @dir /opt
 @dir /opt/%%PORTNAME%%
 @dir /opt/%%PORTNAME%%/bin

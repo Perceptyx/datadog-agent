@@ -21,17 +21,17 @@ rcvar=datadog_agent_trace_enable
 load_rc_config $name
 
 : ${datadog_agent_trace_enable:="NO"}
-: ${datadog_agent_trace_user="%%USER%%"}
+: ${datadog_agent_trace_user="dd-agent"}
 : ${datadog_agent_trace_config:="%%ETCDIR%%/datadog.yaml"}
 
 command="/opt/datadog-agent/embedded/bin/trace-agent"
-command_args="-c ${datadog_agent_trace_config}"
+command_args="-config ${datadog_agent_trace_config}"
 
-required_files=%%ETCDIR%%/datadog.yaml
-pidfile="%%RUNDIR%%/datadog-agent-trace.pid"
+required_files="${datadog_agent_trace_config}"
+pidfile="/var/run/${name}.pid"
 
-start_cmd="${name}_command start $@"
-stop_cmd="${name}_command stop $@"
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
 status_cmd="${name}_status"
 
 datadog_agent_trace_status()
@@ -46,7 +46,7 @@ datadog_agent_trace_status()
 }
 
 datadog_agent_trace_start() {
-	/usr/sbin/daemon -f -p ${pidfile} -u ${datadog_agent_user} ${command}
+	/usr/sbin/daemon -f -p ${pidfile} -u ${datadog_agent_trace_user} ${command} ${command_args}
 	return $?
 }
 

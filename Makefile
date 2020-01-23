@@ -2,6 +2,7 @@
 
 PORTNAME=	datadog-agent
 DISTVERSION=	6.13.0
+PORTREVISION=	4
 CATEGORIES=	sysutils
 
 MAINTAINER=	admins@perceptyx.com
@@ -16,7 +17,7 @@ BUILD_DEPENDS=	go>=1.11.5:lang/go \
 USES=	python:3.7 go
 
 DATADOG_PREFIX=	/opt/datadog-agent
-LOGDIR=	/var/log/datadog
+LOGDIR?=	/var/log/datadog
 ETCDIR=	${PREFIX}/etc/datadog
 
 USE_GITHUB=	yes
@@ -94,8 +95,6 @@ USE_RC_SUBR=	${PORTNAME}-process ${PORTNAME}-trace ${PORTNAME}
 USERS=	dd-agent
 GROUPS=	dd-agent
 
-#USER=${USERS} ## sub_list
-#USER=${USERS} ## plist_sub+
 SUB_FILES=	pkg-message pkg-deinstall
 SUB_LIST=	RUNDIR=${RUNDIR} \
 			LOGDIR=${LOGDIR} \
@@ -111,25 +110,25 @@ PLIST_SUB+=	RUNDIR=${RUNDIR} \
 OPTIONS_DEFINE=	DOCS APM CONSUL PYTHON EC2 ETCD GCE JMX LOG PROCESS ZK ZLIB
 OPTIONS_DEFAULT= DOCS EC2 GCE LOG PYTHON PROCESS ZLIB
 
-DOCS_DESC=		Install documentation
-APM_DESC=		Make the APM agent execution available
-CONSUL_DESC=	Enable consul as a configuration store
-PYTHON_DESC=	Embed the Python interpreter
 #DOCKER_DESC= 	Add Docker support (required by AutoDiscovery) -- This does not work in FreeBSD
-EC2_DESC= 		Enable EC2 hostname detection and metadata collection
-ETCD_DESC= 		Enable Etcd as a configuration store
-GCE_DESC= 		Enable GCE hostname detection and metadata collection
-JMX_DESC= 		Enable the JMX-fetch bridge
 #KUBELET_DESC=	Enable kubelet tag collection
-LOG_DESC=			Enable the log agent
-PROCESS_DESC=	Enable the process agent
-ZK_DESC=			Enable Zookeeper as a configuration store
-ZLIB_DESC=		Use zlib
 #SYSTEMD_DESC=	Enable systemd journal log collection -- This does not work in FreeBSD
+APM_DESC=	Make the APM agent execution available
+CONSUL_DESC=	Enable consul as a configuration store
+DOCS_DESC=	Install documentation
+EC2_DESC= 	Enable EC2 hostname detection and metadata collection
+ETCD_DESC= 	Enable Etcd as a configuration store
+GCE_DESC= 	Enable GCE hostname detection and metadata collection
+JMX_DESC= 	Enable the JMX-fetch bridge
+LOG_DESC=	Enable the log agent
+PROCESS_DESC=	Enable the process agent
+PYTHON_DESC=	Embed the Python interpreter
+ZK_DESC=	Enable Zookeeper as a configuration store
+ZLIB_DESC=	Use zlib
 
-APM_VARS=			agent_build_tags+=apm
+APM_VARS=	agent_build_tags+=apm
 CONSUL_VARS=	agent_build_tags+=consul
-PYTHON_VARS=	agent_build_tags+=python
+PYTHON_VARS=	agent_build_tags+=python3
 USE_LDCONFIG=	${DATADOG_PREFIX}/embedded/lib
 
 PYTHON_BUILD_DEPENDS=	${PYTHON_PKGNAMEPREFIX}invoke>=1.2.0_1:devel/py-invoke \
@@ -195,7 +194,6 @@ do-install:
 	${MKDIR} ${STAGEDIR}${DATADOG_PREFIX}/embedded/datadog_checks
 	${MKDIR} ${STAGEDIR}${ETCDIR}/conf.d
 	${MKDIR} ${STAGEDIR}${LOGDIR}
-	${MKDIR} ${STAGEDIR}${RUNDIR}
 
 .for doc in README.md CHANGELOG.rst CONTRIBUTING.md LICENSE
 	(${INSTALL_MAN} ${WRKSRC}/${doc} ${STAGEDIR}${DATADOG_PREFIX})
