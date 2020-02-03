@@ -1,8 +1,7 @@
 # $FreeBSD$
 
 PORTNAME=	datadog-agent
-DISTVERSION=	6.13.0
-PORTREVISION=	4
+DISTVERSION=	7.16.0
 CATEGORIES=	sysutils
 
 MAINTAINER=	admins@perceptyx.com
@@ -29,7 +28,7 @@ GH_TAGNAME=	${DISTVERSION}
 
 # For list of modules you can check:
 # https://github.com/DataDog/datadog-agent/blob/${DISTVERSION}/Gopkg.toml
-GH_TUPLE=	DataDog:agent-payload:4.7.1:agent_payload/src/github.com/DataDog/agent-payload \
+GH_TUPLE=	DataDog:agent-payload:4.24.0:agent_payload/src/github.com/DataDog/agent-payload \
 					DataDog:gohai:master:gohai/src/github.com/DataDog/gohai \
 					DataDog:zstd:v1.3.0:zstd/src/github.com/DataDog/zstd \
 					DataDog:zstd:2b373cb:zstd_v0_5/src/github.com/DataDog/zstd.v0.5 \
@@ -83,27 +82,26 @@ GH_TUPLE=	DataDog:agent-payload:4.7.1:agent_payload/src/github.com/DataDog/agent
 					samuel:go-zookeeper:c4fab1a:go_zookeeper/src/github.com/samuel/go-zookeeper \
 					ugorji:go:8c0409f:ugorji_go/src/github.com/ugorji/go \
 					coreos:pkg:v4:coreos_pkg/src/github.com/coreos/pkg \
-					DataDog:integrations-core:${DISTVERSION}:integrations \
+					DataDog:integrations-core:7.16.0:integrations \
 					DataDog:datadog-go:2.1.0:datadog_go/src/github.com/DataDog/datadog-go \
 					DataDog:gopsutil:3ca45fa:datadog_gopsutil/src/github.com/DataDog/gopsutil \
 					pkg:errors:v0.8.0:errors/src/github.com/pkg/errors \
 					tinylib:msgp:v1.1.0:msgp/src/github.com/tinylib/msgp \
-					philhofer:fwd:v1.0.0:fwd/src/github.com/philhofer/fwd
+					philhofer:fwd:v1.0.0:fwd/src/github.com/philhofer/fwd \
+					benesch:cgosymbolizer:bec6fe6:cgosymbolizer/src/github.com/benesch/cgosymbolizer
 
 USE_RC_SUBR=	${PORTNAME}-process ${PORTNAME}-trace ${PORTNAME}
 
 USERS=	dd-agent
 GROUPS=	dd-agent
 
-SUB_FILES=	pkg-message pkg-deinstall
-SUB_LIST=	RUNDIR=${RUNDIR} \
-			LOGDIR=${LOGDIR} \
+SUB_FILES=	pkg-message pkg-deinstall datadog-agent datadog-agent-trace datadog-agent-process
+SUB_LIST=	LOGDIR=${LOGDIR} \
 			PYTHON_SITELIBDIR=${PYTHON_SITELIBDIR} \
 			PYTHON_CMD=${PYTHON_CMD} \
 			PORTNAME=${PORTNAME}
 
-PLIST_SUB+=	RUNDIR=${RUNDIR} \
-			LOGDIR=${LOGDIR} \
+PLIST_SUB+=	LOGDIR=${LOGDIR} \
 			GROUP=${GROUPS} \
 			PORTNAME=${PORTNAME}
 
@@ -113,22 +111,22 @@ OPTIONS_DEFAULT= DOCS EC2 GCE LOG PYTHON PROCESS ZLIB
 #DOCKER_DESC= 	Add Docker support (required by AutoDiscovery) -- This does not work in FreeBSD
 #KUBELET_DESC=	Enable kubelet tag collection
 #SYSTEMD_DESC=	Enable systemd journal log collection -- This does not work in FreeBSD
-APM_DESC=	Make the APM agent execution available
+APM_DESC=		Make the APM agent execution available
 CONSUL_DESC=	Enable consul as a configuration store
-DOCS_DESC=	Install documentation
-EC2_DESC= 	Enable EC2 hostname detection and metadata collection
-ETCD_DESC= 	Enable Etcd as a configuration store
-GCE_DESC= 	Enable GCE hostname detection and metadata collection
-JMX_DESC= 	Enable the JMX-fetch bridge
-LOG_DESC=	Enable the log agent
+DOCS_DESC=		Install documentation
+EC2_DESC= 		Enable EC2 hostname detection and metadata collection
+ETCD_DESC= 		Enable Etcd as a configuration store
+GCE_DESC= 		Enable GCE hostname detection and metadata collection
+JMX_DESC= 		Enable the JMX-fetch bridge
+LOG_DESC=			Enable the log agent
 PROCESS_DESC=	Enable the process agent
 PYTHON_DESC=	Embed the Python interpreter
-ZK_DESC=	Enable Zookeeper as a configuration store
-ZLIB_DESC=	Use zlib
+ZK_DESC=			Enable Zookeeper as a configuration store
+ZLIB_DESC=		Use zlib
 
-APM_VARS=	agent_build_tags+=apm
+APM_VARS=			agent_build_tags+=apm
 CONSUL_VARS=	agent_build_tags+=consul
-PYTHON_VARS=	agent_build_tags+=python3
+PYTHON_VARS=	agent_build_tags+=python
 USE_LDCONFIG=	${DATADOG_PREFIX}/embedded/lib
 
 PYTHON_BUILD_DEPENDS=	${PYTHON_PKGNAMEPREFIX}invoke>=1.2.0_1:devel/py-invoke \
@@ -148,8 +146,6 @@ PROCESS_VARS=	agent_build_tags+=process
 ZK_VARS=	agent_build_tags+=zk
 ZLIB_VARS=	agent_build_tags+=zlib
 
-#BUILD_USER?=    ${USER}
-
 LD_FLAG_X_PREFIX=	-X ${GO_WRKSRC}/pkg/version
 LD_FLAG_STRING=	-s ${LD_FLAG_X_PREFIX}.Version=${DISTVERSION}
 
@@ -161,7 +157,7 @@ LD_FLAG_STRING= -s ${LD_FLAG_X_PREFIX}.AgentVersion=${DISTVERSION}
 DATADOG_BINARIES=	agent dogstatsd process-agent trace-agent
 
 # find integrations-core -name setup.py | awk -F\/ '{print $2}' | sort | uniq | grep -v datadog_checks_dev | tr '\n' ' '
-INTEGRATIONS=	active_directory activemq activemq_xml aerospike agent_metrics ambari apache aspdotnet btrfs cacti cassandra cassandra_nodetool ceph cisco_aci cockroachdb consul coredns couch couchbase crio datadog_checks_base datadog_checks_downloader datadog_checks_tests_helper directory disk dns_check docker_daemon dotnetclr ecs_fargate elastic envoy etcd exchange_server fluentd gearmand gitlab gitlab_runner go-metro go_expvar gunicorn haproxy harbor hdfs_datanode hdfs_namenode hive http_check hyperv ibm_db2 ibm_mq ibm_was iis istio jboss_wildfly kafka kafka_consumer kong kube_apiserver_metrics kube_controller_manager kube_dns kube_metrics_server kube_proxy kube_scheduler kubelet kubernetes kubernetes_state kyototycoon lighttpd linkerd linux_proc_extras mapreduce marathon mcache mesos_master mesos_slave mongo mysql nagios network nfsstat nginx nginx_ingress_controller ntp openldap openmetrics openstack openstack_controller oracle pdh_check pgbouncer php_fpm postfix postgres powerdns_recursor presto process prometheus rabbitmq redisdb riak riakcs snmp solr spark sqlserver squid ssh_check statsd supervisord system_core system_swap tcp_check teamcity tls tokumx tomcat twemproxy twistlock varnish vault vsphere win32_event_log windows_service wmi_check yarn zk
+INTEGRATIONS=	active_directory activemq activemq_xml aerospike ambari apache aspdotnet btrfs cacti cassandra cassandra_nodetool ceph cisco_aci cockroachdb consul coredns couch couchbase crio datadog_checks_base datadog_checks_downloader datadog_checks_tests_helper directory disk dns_check docker_daemon dotnetclr ecs_fargate elastic envoy etcd exchange_server fluentd gearmand gitlab gitlab_runner go-metro go_expvar gunicorn haproxy harbor hdfs_datanode hdfs_namenode hive http_check hyperv ibm_db2 ibm_mq ibm_was iis istio jboss_wildfly kafka kafka_consumer kong kube_apiserver_metrics kube_controller_manager kube_dns kube_metrics_server kube_proxy kube_scheduler kubelet kubernetes kubernetes_state kyototycoon lighttpd linkerd linux_proc_extras mapreduce marathon mcache mesos_master mesos_slave mongo mysql nagios network nfsstat nginx nginx_ingress_controller openldap openmetrics openstack openstack_controller oracle pdh_check pgbouncer php_fpm postfix postgres powerdns_recursor presto process prometheus rabbitmq redisdb riak riakcs snmp solr spark sqlserver squid ssh_check statsd supervisord system_core system_swap tcp_check teamcity tls tokumx tomcat twemproxy twistlock varnish vault vsphere win32_event_log windows_service wmi_check yarn zk
 
 # find integrations-core -name conf.yaml.example | awk -F\/ '{print $2}' | sort | uniq | grep -v datadog_checks_dev | tr '\n' ' '
 CONFFILES=	active_directory activemq activemq_xml aerospike ambari apache aspdotnet btrfs cacti cassandra cassandra_nodetool ceph cisco_aci cockroachdb consul coredns couch couchbase crio directory dns_check docker_daemon dotnetclr ecs_fargate elastic envoy etcd exchange_server fluentd gearmand gitlab gitlab_runner go-metro go_expvar gunicorn haproxy harbor hdfs_datanode hdfs_namenode hive http_check hyperv ibm_db2 ibm_mq ibm_was iis istio jboss_wildfly kafka kafka_consumer kong kube_apiserver_metrics kube_controller_manager kube_dns kube_metrics_server kube_proxy kube_scheduler kubelet kubernetes kubernetes_state kyototycoon lighttpd linkerd linux_proc_extras mapreduce marathon mcache mesos_master mesos_slave mongo mysql nagios nfsstat nginx nginx_ingress_controller openldap openmetrics openstack openstack_controller oracle pdh_check pgbouncer php_fpm postfix postgres powerdns_recursor presto process prometheus rabbitmq redisdb riak riakcs snmp solr spark sqlserver squid ssh_check statsd supervisord system_core system_swap tcp_check teamcity tls tokumx tomcat twemproxy twistlock varnish vault vsphere win32_event_log windows_service wmi_check yarn zk
@@ -178,7 +174,7 @@ do-build:
 .for bin in ${DATADOG_BINARIES}
 	(cd ${GO_WRKSRC}/cmd/${bin}; \
 		${SETENV} ${MAKE_ENV} ${BUILD_ENV} GOPATH=${WRKSRC} \
-		CGO_CFLAGS="-w -I${WRKSRC}/rtloader/include" \
+		CGO_CFLAGS="-w -I${WRKSRC}/rtloader/include -I${WRKSRC}/rtloader/common" \
 		CGO_LDFLAGS="-L${WRKSRC}/rtloader/rtloader" go build -tags \
 		'${AGENT_BUILD_TAGS}' -o ${GO_WRKSRC}/cmd/${bin}/${bin} -ldflags "${LD_FLAG_STRING}")
 .endfor
@@ -199,12 +195,13 @@ do-install:
 	(${INSTALL_MAN} ${WRKSRC}/${doc} ${STAGEDIR}${DATADOG_PREFIX})
 .endfor
 
+	# Install binaries
 	${INSTALL_PROGRAM} ${GO_WRKSRC}/cmd/process-agent/process-agent ${STAGEDIR}${DATADOG_PREFIX}/embedded/bin/process-agent
 	${INSTALL_PROGRAM} ${GO_WRKSRC}/cmd/trace-agent/trace-agent ${STAGEDIR}${DATADOG_PREFIX}/embedded/bin/trace-agent
 	${INSTALL_PROGRAM} ${GO_WRKSRC}/cmd/agent/agent	${STAGEDIR}${DATADOG_PREFIX}/bin/agent
 	cd ${GO_WRKSRC}/cmd/agent && ${COPYTREE_SHARE} dist ${STAGEDIR}${DATADOG_PREFIX}/bin/agent
 	cd ${GO_WRKSRC}/pkg/status/dist && ${COPYTREE_SHARE} templates ${STAGEDIR}${DATADOG_PREFIX}/bin/agent/dist
-	${INSTALL} ${GO_WRKSRC}/cmd/agent/dist/datadog.yaml ${STAGEDIR}${ETCDIR}/datadog.yaml.sample
+	${MV} ${GO_WRKSRC}/cmd/agent/dist/datadog.yaml ${STAGEDIR}${ETCDIR}/datadog.yaml.sample
 
 	# Install core-integrations
 .for dir in ${CONFFILES}
@@ -218,6 +215,7 @@ do-install:
 	${TAR} -xzf dist/*.tar.gz -C ${STAGEDIR})
 .endfor
 
+	# Install rtloader library
 	cd ${WRKSRC}/rtloader && make -C . install DESTDIR=${STAGEDIR}
 
 post-install:

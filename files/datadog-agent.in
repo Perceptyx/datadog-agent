@@ -28,7 +28,7 @@ command="/opt/datadog-agent/bin/agent/agent"
 command_args="-c ${datadog_agent_config}"
 
 required_files="%%ETCDIR%%/datadog.yaml"
-pidfile="/var/run/datadog-agent.pid"
+pidfile="/var/run/${name}.pid"
 
 extra_commands="status restart status configcheck check diagnose stats flare health help launch_gui secret version"
 
