@@ -2,6 +2,7 @@
 
 PORTNAME=	datadog-agent
 DISTVERSION=	7.16.0
+PORTREVISION=	1
 CATEGORIES=	sysutils
 
 MAINTAINER=	admins@perceptyx.com
@@ -111,22 +112,30 @@ OPTIONS_DEFAULT= DOCS EC2 GCE LOG PYTHON PROCESS ZLIB
 #DOCKER_DESC= 	Add Docker support (required by AutoDiscovery) -- This does not work in FreeBSD
 #KUBELET_DESC=	Enable kubelet tag collection
 #SYSTEMD_DESC=	Enable systemd journal log collection -- This does not work in FreeBSD
-APM_DESC=		Make the APM agent execution available
+APM_DESC=	Make the APM agent execution available
 CONSUL_DESC=	Enable consul as a configuration store
-DOCS_DESC=		Install documentation
-EC2_DESC= 		Enable EC2 hostname detection and metadata collection
-ETCD_DESC= 		Enable Etcd as a configuration store
-GCE_DESC= 		Enable GCE hostname detection and metadata collection
-JMX_DESC= 		Enable the JMX-fetch bridge
-LOG_DESC=			Enable the log agent
+DOCS_DESC=	Install documentation
+EC2_DESC= 	Enable EC2 hostname detection and metadata collection
+ETCD_DESC= 	Enable Etcd as a configuration store
+GCE_DESC= 	Enable GCE hostname detection and metadata collection
+JMX_DESC= 	Enable the JMX-fetch bridge
+LOG_DESC=	Enable the log agent
 PROCESS_DESC=	Enable the process agent
 PYTHON_DESC=	Embed the Python interpreter
-ZK_DESC=			Enable Zookeeper as a configuration store
-ZLIB_DESC=		Use zlib
+ZK_DESC=	Enable Zookeeper as a configuration store
+ZLIB_DESC=	Use zlib
 
-APM_VARS=			agent_build_tags+=apm
+APM_VARS=	agent_build_tags+=apm
 CONSUL_VARS=	agent_build_tags+=consul
+EC2_VARS=	agent_build_tags+=ec2
+ETCD_VARS=	agent_build_tags+=etcd
+GCE_VARS=	agent_build_tags+=gce
+JMX_VARS=	agent_build_tags+=jmx
+LOG_VARS=	agent_build_tags+=log
+PROCESS_VARS=	agent_build_tags+=process
 PYTHON_VARS=	agent_build_tags+=python
+ZK_VARS=	agent_build_tags+=zk
+ZLIB_VARS=	agent_build_tags+=zlib
 USE_LDCONFIG=	${DATADOG_PREFIX}/embedded/lib
 
 PYTHON_BUILD_DEPENDS=	${PYTHON_PKGNAMEPREFIX}invoke>=1.2.0_1:devel/py-invoke \
@@ -137,14 +146,8 @@ PYTHON_BUILD_DEPENDS=	${PYTHON_PKGNAMEPREFIX}invoke>=1.2.0_1:devel/py-invoke \
 	${PYTHON_PKGNAMEPREFIX}requests>=2.21.0:www/py-requests \
 	${PYTHON_PKGNAMEPREFIX}toml>=0.9.4:textproc/py-toml
 
-EC2_VARS=	agent_build_tags+=ec2
-ETCD_VARS=	agent_build_tags+=etcd
-GCE_VARS=	agent_build_tags+=gce
-JMX_VARS=	agent_build_tags+=jmx
-LOG_VARS=	agent_build_tags+=log
-PROCESS_VARS=	agent_build_tags+=process
-ZK_VARS=	agent_build_tags+=zk
-ZLIB_VARS=	agent_build_tags+=zlib
+PYTHON_RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}prometheus-client>=0.7.1:net-mgmt/py-prometheus-client
+
 
 LD_FLAG_X_PREFIX=	-X ${GO_WRKSRC}/pkg/version
 LD_FLAG_STRING=	-s ${LD_FLAG_X_PREFIX}.Version=${DISTVERSION}
@@ -180,9 +183,9 @@ do-build:
 .endfor
 
 # Generate config files
-	go run ${GO_WRKSRC}/pkg/config/render_config.go agent \
-	${GO_WRKSRC}/pkg/config/config_template.yaml \
-	${GO_WRKSRC}/cmd/agent/dist/datadog.yaml
+	go run ${GO_WRKSRC}/pkg/config/render_config.go agent-py3 \
+       		${GO_WRKSRC}/pkg/config/config_template.yaml \
+       		${GO_WRKSRC}/cmd/agent/dist/datadog.yaml
 
 do-install:
 	${MKDIR} ${STAGEDIR}${DATADOG_PREFIX}/bin/agent
@@ -201,7 +204,7 @@ do-install:
 	${INSTALL_PROGRAM} ${GO_WRKSRC}/cmd/agent/agent	${STAGEDIR}${DATADOG_PREFIX}/bin/agent
 	cd ${GO_WRKSRC}/cmd/agent && ${COPYTREE_SHARE} dist ${STAGEDIR}${DATADOG_PREFIX}/bin/agent
 	cd ${GO_WRKSRC}/pkg/status/dist && ${COPYTREE_SHARE} templates ${STAGEDIR}${DATADOG_PREFIX}/bin/agent/dist
-	${MV} ${GO_WRKSRC}/cmd/agent/dist/datadog.yaml ${STAGEDIR}${ETCDIR}/datadog.yaml.sample
+	${CP} ${GO_WRKSRC}/cmd/agent/dist/datadog.yaml ${STAGEDIR}${ETCDIR}/datadog.yaml.sample
 
 	# Install core-integrations
 .for dir in ${CONFFILES}
