@@ -89,7 +89,8 @@ GH_TUPLE=	DataDog:agent-payload:4.24.0:agent_payload/src/github.com/DataDog/agen
 					pkg:errors:v0.8.0:errors/src/github.com/pkg/errors \
 					tinylib:msgp:v1.1.0:msgp/src/github.com/tinylib/msgp \
 					philhofer:fwd:v1.0.0:fwd/src/github.com/philhofer/fwd \
-					benesch:cgosymbolizer:bec6fe6:cgosymbolizer/src/github.com/benesch/cgosymbolizer
+					benesch:cgosymbolizer:bec6fe6:cgosymbolizer/src/github.com/benesch/cgosymbolizer \
+					blabber:go-freebsd-sysctl:dcd5a22:go_freebsd_sysctl/src/github.com/blabber/go-freebsd-sysctl
 
 USE_RC_SUBR=	${PORTNAME}-process ${PORTNAME}-trace ${PORTNAME}
 
