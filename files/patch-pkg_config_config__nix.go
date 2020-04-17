@@ -1,8 +1,8 @@
---- pkg/config/config_nix.go.orig	2019-07-22 00:27:56 UTC
+--- pkg/config/config_nix.go.orig	2019-12-17 19:31:02 UTC
 +++ pkg/config/config_nix.go
 @@ -9,9 +9,9 @@
  package config
-
+ 
  const (
 -	defaultConfdPath            = "/etc/datadog-agent/conf.d"
 -	defaultAdditionalChecksPath = "/etc/datadog-agent/checks.d"

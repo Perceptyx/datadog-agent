@@ -2,7 +2,7 @@
 
 PORTNAME=	datadog-agent
 DISTVERSION=	7.16.0
-PORTREVISION=	1
+PORTREVISION=	6
 CATEGORIES=	sysutils
 
 MAINTAINER=	admins@perceptyx.com
@@ -12,13 +12,15 @@ LICENSE=	BSD3CLAUSE
 LICENSE_FILE=	${WRKSRC}/LICENSE
 
 BUILD_DEPENDS=	go>=1.11.5:lang/go \
-	cmake>=3.12:devel/cmake
+		cmake>=3.12:devel/cmake
+
+RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}yaml>0:devel/py-yaml
 
 USES=	python:3.7 go
 
 DATADOG_PREFIX=	/opt/datadog-agent
 LOGDIR?=	/var/log/datadog
-ETCDIR=	${PREFIX}/etc/datadog
+ETCDIR=		${PREFIX}/etc/datadog
 
 USE_GITHUB=	yes
 GH_ACCOUNT=	DataDog
@@ -83,7 +85,6 @@ GH_TUPLE=	DataDog:agent-payload:4.24.0:agent_payload/src/github.com/DataDog/agen
 					samuel:go-zookeeper:c4fab1a:go_zookeeper/src/github.com/samuel/go-zookeeper \
 					ugorji:go:8c0409f:ugorji_go/src/github.com/ugorji/go \
 					coreos:pkg:v4:coreos_pkg/src/github.com/coreos/pkg \
-					DataDog:integrations-core:7.16.0:integrations \
 					DataDog:datadog-go:2.1.0:datadog_go/src/github.com/DataDog/datadog-go \
 					DataDog:gopsutil:3ca45fa:datadog_gopsutil/src/github.com/DataDog/gopsutil \
 					pkg:errors:v0.8.0:errors/src/github.com/pkg/errors \
@@ -99,13 +100,15 @@ GROUPS=	dd-agent
 
 SUB_FILES=	pkg-message pkg-deinstall datadog-agent datadog-agent-trace datadog-agent-process
 SUB_LIST=	LOGDIR=${LOGDIR} \
-			PYTHON_SITELIBDIR=${PYTHON_SITELIBDIR} \
-			PYTHON_CMD=${PYTHON_CMD} \
-			PORTNAME=${PORTNAME}
+		PYTHON_SITELIBDIR=${PYTHON_SITELIBDIR} \
+		PYTHON_CMD=${PYTHON_CMD} \
+		PORTNAME=${PORTNAME} \
+		ETCDIR=${ETCDIR}
 
 PLIST_SUB+=	LOGDIR=${LOGDIR} \
-			GROUP=${GROUPS} \
-			PORTNAME=${PORTNAME}
+		GROUP=${GROUPS} \
+		PORTNAME=${PORTNAME} \
+		ETCDIR=${ETCDIR}
 
 OPTIONS_DEFINE=	DOCS APM CONSUL PYTHON EC2 ETCD GCE JMX LOG PROCESS ZK ZLIB
 OPTIONS_DEFAULT= DOCS EC2 GCE LOG PYTHON PROCESS ZLIB
@@ -149,23 +152,12 @@ PYTHON_BUILD_DEPENDS=	${PYTHON_PKGNAMEPREFIX}invoke>=1.2.0_1:devel/py-invoke \
 
 PYTHON_RUN_DEPENDS=	${PYTHON_PKGNAMEPREFIX}prometheus-client>=0.7.1:net-mgmt/py-prometheus-client
 
-
 LD_FLAG_X_PREFIX=	-X ${GO_WRKSRC}/pkg/version
 LD_FLAG_STRING=	-s ${LD_FLAG_X_PREFIX}.Version=${DISTVERSION}
-
-#LD_FLAG_X_PREFIX=       -X ${GO_PKGNAME}/vendor/${GO_PKGNAME:H}/common/version
 LD_FLAG_X_PREFIX=	-X ${GO_PKGNAME}/pkg/version
-
 LD_FLAG_STRING= -s ${LD_FLAG_X_PREFIX}.AgentVersion=${DISTVERSION}
 
 DATADOG_BINARIES=	agent dogstatsd process-agent trace-agent
-
-# find integrations-core -name setup.py | awk -F\/ '{print $2}' | sort | uniq | grep -v datadog_checks_dev | tr '\n' ' '
-INTEGRATIONS=	active_directory activemq activemq_xml aerospike ambari apache aspdotnet btrfs cacti cassandra cassandra_nodetool ceph cisco_aci cockroachdb consul coredns couch couchbase crio datadog_checks_base datadog_checks_downloader datadog_checks_tests_helper directory disk dns_check docker_daemon dotnetclr ecs_fargate elastic envoy etcd exchange_server fluentd gearmand gitlab gitlab_runner go-metro go_expvar gunicorn haproxy harbor hdfs_datanode hdfs_namenode hive http_check hyperv ibm_db2 ibm_mq ibm_was iis istio jboss_wildfly kafka kafka_consumer kong kube_apiserver_metrics kube_controller_manager kube_dns kube_metrics_server kube_proxy kube_scheduler kubelet kubernetes kubernetes_state kyototycoon lighttpd linkerd linux_proc_extras mapreduce marathon mcache mesos_master mesos_slave mongo mysql nagios network nfsstat nginx nginx_ingress_controller openldap openmetrics openstack openstack_controller oracle pdh_check pgbouncer php_fpm postfix postgres powerdns_recursor presto process prometheus rabbitmq redisdb riak riakcs snmp solr spark sqlserver squid ssh_check statsd supervisord system_core system_swap tcp_check teamcity tls tokumx tomcat twemproxy twistlock varnish vault vsphere win32_event_log windows_service wmi_check yarn zk
-
-# find integrations-core -name conf.yaml.example | awk -F\/ '{print $2}' | sort | uniq | grep -v datadog_checks_dev | tr '\n' ' '
-CONFFILES=	active_directory activemq activemq_xml aerospike ambari apache aspdotnet btrfs cacti cassandra cassandra_nodetool ceph cisco_aci cockroachdb consul coredns couch couchbase crio directory dns_check docker_daemon dotnetclr ecs_fargate elastic envoy etcd exchange_server fluentd gearmand gitlab gitlab_runner go-metro go_expvar gunicorn haproxy harbor hdfs_datanode hdfs_namenode hive http_check hyperv ibm_db2 ibm_mq ibm_was iis istio jboss_wildfly kafka kafka_consumer kong kube_apiserver_metrics kube_controller_manager kube_dns kube_metrics_server kube_proxy kube_scheduler kubelet kubernetes kubernetes_state kyototycoon lighttpd linkerd linux_proc_extras mapreduce marathon mcache mesos_master mesos_slave mongo mysql nagios nfsstat nginx nginx_ingress_controller openldap openmetrics openstack openstack_controller oracle pdh_check pgbouncer php_fpm postfix postgres powerdns_recursor presto process prometheus rabbitmq redisdb riak riakcs snmp solr spark sqlserver squid ssh_check statsd supervisord system_core system_swap tcp_check teamcity tls tokumx tomcat twemproxy twistlock varnish vault vsphere win32_event_log windows_service wmi_check yarn zk
-
 
 do-build:
 # Build rtloader (Previously called six)
@@ -183,17 +175,16 @@ do-build:
 		'${AGENT_BUILD_TAGS}' -o ${GO_WRKSRC}/cmd/${bin}/${bin} -ldflags "${LD_FLAG_STRING}")
 .endfor
 
-# Generate config files
+	# Generate config files
 	go run ${GO_WRKSRC}/pkg/config/render_config.go agent-py3 \
-       		${GO_WRKSRC}/pkg/config/config_template.yaml \
-       		${GO_WRKSRC}/cmd/agent/dist/datadog.yaml
+		${GO_WRKSRC}/pkg/config/config_template.yaml \
+		${GO_WRKSRC}/cmd/agent/dist/datadog.yaml
 
 do-install:
 	${MKDIR} ${STAGEDIR}${DATADOG_PREFIX}/bin/agent
 	${MKDIR} ${STAGEDIR}${DATADOG_PREFIX}/embedded/bin
 	${MKDIR} ${STAGEDIR}${DATADOG_PREFIX}/embedded/datadog_checks
-	${MKDIR} ${STAGEDIR}${ETCDIR}/conf.d
-	${MKDIR} ${STAGEDIR}${LOGDIR}
+	${MKDIR} ${STAGEDIR}${ETCDIR}
 
 .for doc in README.md CHANGELOG.rst CONTRIBUTING.md LICENSE
 	(${INSTALL_MAN} ${WRKSRC}/${doc} ${STAGEDIR}${DATADOG_PREFIX})
@@ -207,23 +198,12 @@ do-install:
 	cd ${GO_WRKSRC}/pkg/status/dist && ${COPYTREE_SHARE} templates ${STAGEDIR}${DATADOG_PREFIX}/bin/agent/dist
 	${CP} ${GO_WRKSRC}/cmd/agent/dist/datadog.yaml ${STAGEDIR}${ETCDIR}/datadog.yaml.sample
 
-	# Install core-integrations
-.for dir in ${CONFFILES}
-	(cd ${WRKSRC_integrations}/${dir}; \
-	${MV} datadog_checks/${dir}/data ${STAGEDIR}${ETCDIR}/conf.d/${dir}.d)
-.endfor
-
-.for dir in ${INTEGRATIONS}
-	(cd ${WRKSRC_integrations}/${dir}; \
-	${PYTHON_CMD} setup.py bdist; \
-	${TAR} -xzf dist/*.tar.gz -C ${STAGEDIR})
-.endfor
-
 	# Install rtloader library
 	cd ${WRKSRC}/rtloader && make -C . install DESTDIR=${STAGEDIR}
 
 post-install:
 	${STRIP_CMD} ${STAGEDIR}/opt/datadog-agent/embedded/lib/libdatadog-agent-rtloader.so.0.1.0
 	${STRIP_CMD} ${STAGEDIR}/opt/datadog-agent/embedded/lib/libdatadog-agent-three.so
+	${MKDIR} ${STAGEDIR}${LOGDIR}
 
 .include <bsd.port.mk>
