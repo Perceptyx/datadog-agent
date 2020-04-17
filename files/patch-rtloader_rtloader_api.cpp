@@ -1,6 +1,6 @@
---- rtloader/rtloader/api.cpp.orig	2019-07-15 23:58:24 UTC
+--- rtloader/rtloader/api.cpp.orig	2019-12-17 19:31:02 UTC
 +++ rtloader/rtloader/api.cpp
-@@ -24,6 +24,9 @@
+@@ -25,6 +25,9 @@
  #elif _WIN32
  #    define DATADOG_AGENT_TWO "libdatadog-agent-two.dll"
  #    define DATADOG_AGENT_THREE "libdatadog-agent-three.dll"
