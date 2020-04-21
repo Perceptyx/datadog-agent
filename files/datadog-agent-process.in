@@ -30,8 +30,8 @@ command_args="-c ${datadog_agent_process_config}"
 required_files="%%ETCDIR%%/datadog.yaml"
 pidfile="/var/run/${name}.pid"
 
-start_cmd="${name}_command start $@"
-stop_cmd="${name}_command stop $@"
+start_cmd="${name}_start $@"
+stop_cmd="${name}_stop $@"
 status_cmd="${name}_status"
 
 datadog_agent_process_status()

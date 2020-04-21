@@ -93,7 +93,7 @@ GH_TUPLE=	DataDog:agent-payload:4.24.0:agent_payload/src/github.com/DataDog/agen
 					benesch:cgosymbolizer:bec6fe6:cgosymbolizer/src/github.com/benesch/cgosymbolizer \
 					blabber:go-freebsd-sysctl:dcd5a22:go_freebsd_sysctl/src/github.com/blabber/go-freebsd-sysctl
 
-USE_RC_SUBR=	${PORTNAME}-process ${PORTNAME}-trace ${PORTNAME}
+USE_RC_SUBR=	${PORTNAME}-process ${PORTNAME}-trace ${PORTNAME}-sysprobe ${PORTNAME}
 
 USERS=	dd-agent
 GROUPS=	dd-agent
