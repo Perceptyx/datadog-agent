@@ -2,7 +2,7 @@
 
 PORTNAME=	datadog-agent
 DISTVERSION=	7.16.0
-PORTREVISION=	6
+PORTREVISION=	7
 CATEGORIES=	sysutils
 
 MAINTAINER=	admins@perceptyx.com
