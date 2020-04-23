@@ -2,7 +2,7 @@
 
 PORTNAME=	datadog-agent
 DISTVERSION=	7.16.0
-PORTREVISION=	7
+PORTREVISION=	8
 CATEGORIES=	sysutils
 
 MAINTAINER=	admins@perceptyx.com
@@ -20,7 +20,7 @@ USES=	python:3.7 go
 
 DATADOG_PREFIX=	/opt/datadog-agent
 LOGDIR?=	/var/log/datadog
-ETCDIR=		${PREFIX}/etc/datadog
+ETCDIR=		${PREFIX}/etc/datadog-agent
 
 USE_GITHUB=	yes
 GH_ACCOUNT=	DataDog
