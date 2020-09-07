@@ -95,6 +95,9 @@ GH_TUPLE=	DataDog:agent-payload:4.24.0:agent_payload/src/github.com/DataDog/agen
 
 USE_RC_SUBR=	${PORTNAME}-process ${PORTNAME}-trace ${PORTNAME}-sysprobe ${PORTNAME}
 
+GID_FILES=	${PATCHDIR}/GIDs
+UID_FILES=	${PATCHDIR}/UIDs
+
 USERS=	dd-agent
 GROUPS=	dd-agent
 
